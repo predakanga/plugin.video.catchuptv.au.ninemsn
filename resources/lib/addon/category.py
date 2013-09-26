@@ -1,6 +1,7 @@
 #
-#   Network Ten CatchUp TV Video Addon
+#   NineMSN CatchUp TV Video Addon
 #
+#   This code is forked from Network Ten CatchUp TV Video Addon
 #   Copyright (c) 2013 Adam Malcontenti-Wilson
 # 
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,21 +36,24 @@ class Main:
     def __init__( self, params ):
         self.client = NineMSNVideo()
         handle = int(sys.argv[1])
+        category = params['id'][0]
         
-        def get_url(action, id):
+        def get_url(action, id, fullname, season=None):
           url_base = sys.argv[0]
-          url_params = {'action': action, 'id': id}
+          url_params = {'action': action, 'id': id, 'fullname': fullname}
+          if season is not None:
+            url_params['season'] = season
           
           return "{0}?{1}".format(url_base, urllib.urlencode(url_params))
         
-        for section in self.client.get_sections():
-          li = xbmcgui.ListItem(section.name)
-          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('section', section.id), isFolder=True)
-        
-        for category in self.client.get_categories():
-          li = xbmcgui.ListItem(category.name)
-          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('category', category.id), isFolder=True)
+        for show in self.client.get_shows_for_category(category):
+          li = xbmcgui.ListItem("{0} ({1} episodes)".format(show.name, show.episode_count))
+          if len(show.seasons) > 1:
+            url = get_url('show', show.id, show.name)
+          else:
+            url = get_url('show_season', show.id, show.name, '')
+          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=url, isFolder=True)
 
-        # xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE ) # Needed?
+        xbmcplugin.addSortMethod( handle=handle, sortMethod=xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE )
         xbmcplugin.setContent( handle=handle, content='tvshows' )
         xbmcplugin.endOfDirectory( handle=handle, succeeded=1 )

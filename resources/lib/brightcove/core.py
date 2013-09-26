@@ -5,12 +5,11 @@ objects.
 import urllib
 from datetime import datetime
 
-
 def get_item(resp, cls):
     '''Converts a response dictionary to a class instance.
 
     Returns cls(**resp).
-    
+
     '''
     try:
         params = dict((str(key), val) for key, val in resp.items())

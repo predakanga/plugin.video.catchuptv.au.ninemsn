@@ -1,6 +1,7 @@
 #
-#   Network Ten CatchUp TV Video Addon
+#   NineMSN CatchUp TV Video Addon
 #
+#   This code is forked from Network Ten CatchUp TV Video Addon
 #   Copyright (c) 2013 Adam Malcontenti-Wilson
 # 
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,27 +26,29 @@
 import sys
 import pickle
 import urllib
+import utils
 import xbmcgui
 import xbmcplugin
-import utils
-from networktenvideo.api import NetworkTenVideo
-from brightcove.core import get_item
-from networktenvideo.objects import Show
+
+from ninemsnvideo.api import NineMSNVideo
 
 class Main:
-    def __init__( self, params ): 
-        self.client = NetworkTenVideo()
-        show = pickle.loads(params['show'][0])
-        utils.log('Finding playlists for show: %s' % show)
-        playlists = self.client.get_playlists_for_show(show)
-        urlArgs = {'action': 'videos', 'show': params['show'][0]}
-        for playlist in playlists.items:
-            urlArgs['query'] = playlist.query
-            listitem = xbmcgui.ListItem( playlist.name )
-            if show.fanart:
-                listitem.setProperty('fanart_image', show.fanart)
-            xbmcplugin.addDirectoryItem( handle=int( sys.argv[ 1 ] ), listitem=listitem, url="%s?%s" % ( sys.argv[0], urllib.urlencode(urlArgs)), totalItems=len(playlists.items), isFolder=True)
+    def __init__( self, params ):
+        self.client = NineMSNVideo()
+        handle = int(sys.argv[1])
+        show = params['id'][0]
+        show_name = params['fullname'][0]
+        
+        def get_url(action, show, fullname, season):
+          url_base = sys.argv[0]
+          url_params = {'action': action, 'id': show, 'fullname': fullname, 'season': season}
+          
+          return "{0}?{1}".format(url_base, urllib.urlencode(url_params))
+        
+        for season in self.client.get_seasons_for_show(show):
+          li = xbmcgui.ListItem("{0} {1}".format(show_name, season.name))
+          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('show_season', show, "{0} {1}".format(show_name, season.name), season.id), isFolder=True)
 
-        xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED ) 
-        xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE ) 
-        xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=1 )
+        xbmcplugin.addSortMethod( handle=handle, sortMethod=xbmcplugin.SORT_METHOD_NONE )
+        xbmcplugin.setContent( handle=handle, content='tvshows' )
+        xbmcplugin.endOfDirectory( handle=handle, succeeded=1 )

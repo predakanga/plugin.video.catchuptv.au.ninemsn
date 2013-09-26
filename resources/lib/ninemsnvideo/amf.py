@@ -1,6 +1,7 @@
 #
-#   Network Ten CatchUp TV Video API Library
+#   NineMSN CatchUp TV Video API Library
 #
+#   This code is forked from Network Ten CatchUp TV Video API Library
 #   Copyright (c) 2013 Adam Malcontenti-Wilson
 # 
 #   Permission is hereby granted, free of charge, to any person obtaining a copy

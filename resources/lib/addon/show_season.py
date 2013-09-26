@@ -23,11 +23,36 @@
 #   THE SOFTWARE.
 #
 
-import os
-import version
+import sys
+import pickle
+import urllib
+import utils
+import xbmcgui
+import xbmcplugin
 
-ID = 'plugin.video.catchuptv.au.ninemsn'
-NAME = 'Channel Nine CatchUp TV'
-VERSION = version.VERSION
-BUGREPORT_URL = 'https://github.com/predakanga/plugin.video.catchuptv.au.ninemsn/issues'
-DEFAULT_MODULE = 'rootlist'
+from ninemsnvideo.api import NineMSNVideo
+
+class Main:
+    def __init__( self, params ):
+        self.client = NineMSNVideo()
+        handle = int(sys.argv[1])
+        show = params['id'][0]
+        prefix = params['fullname'][0]
+        season = None
+        if 'season' in params:
+          season = params['season'][0] or None # If season is an empty string, this will replace it with None
+        
+        def get_url(action, uuid, url):
+          url_base = sys.argv[0]
+          url_params = {'action': action, 'uuid': uuid, 'page_url': url}
+          
+          return "{0}?{1}".format(url_base, urllib.urlencode(url_params))
+        
+        for video in self.client.get_videos_for_season(show, season):
+          li = xbmcgui.ListItem("{0} {1}".format(prefix, video.name))
+          li.setProperty('IsPlayable', 'true')
+          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('play', video.uuid, video.url))
+
+        xbmcplugin.addSortMethod( handle=handle, sortMethod=xbmcplugin.SORT_METHOD_NONE )
+        xbmcplugin.setContent( handle=handle, content='tvshows' )
+        xbmcplugin.endOfDirectory( handle=handle, succeeded=1 )

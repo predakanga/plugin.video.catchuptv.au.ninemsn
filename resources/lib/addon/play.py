@@ -28,12 +28,21 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 import utils
-from networktenvideo.api import NetworkTenVideo, SWF_URL, PAGE_URL
+from ninemsnvideo.api import NineMSNVideo, SWF_URL
 
 class Main:
     def __init__( self, params ): 
-        self.client = NetworkTenVideo()
-        media = self.client.get_media_for_video(params['videoId'][0])
+        self.client = NineMSNVideo()
+        
+        if not 'uuid' in params:
+          # Perform the lookup using page_url
+          page_url = params['page_url'][0]
+          uuid = self.client.get_uuid_from_url(page_url)
+        else:
+          uuid = params['uuid'][0]
+          page_url = params['page_url'][0]
+        
+        media = self.client.get_media_for_video(uuid)
         utils.log('Found media renditions for video: %s' % repr(media.items))
 
         # Blindly go for the highest bitrate for now. Later versions could include a customisable setting of which stream to use
@@ -42,7 +51,7 @@ class Main:
         path = media.defaultURL
         if path.startswith('rtmp'):
             path = path.replace('&mp4:', ' playpath=mp4:')
-            path += ' swfVfy=true swfUrl=%s pageUrl=%s' % (SWF_URL, PAGE_URL)
+            path += ' swfVfy=true swfUrl=%s pageUrl=%s' % (SWF_URL, page_url)
         utils.log('Using rendition: %s with url: %s' % (media, path))
 
         listitem = xbmcgui.ListItem(path=path)

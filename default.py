@@ -1,6 +1,7 @@
 #
-#   Network Ten CatchUp TV Video Addon
+#   NineMSN CatchUp TV Video Addon
 #
+#   This code is forked from Network Ten CatchUp TV Video Addon
 #   Copyright (c) 2013 Adam Malcontenti-Wilson
 # 
 #   Permission is hereby granted, free of charge, to any person obtaining a copy

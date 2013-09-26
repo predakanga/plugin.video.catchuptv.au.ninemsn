@@ -1,4 +1,4 @@
-<?xml version="1.0" ?><addon id="plugin.video.catchuptv.au.ten" name="Network Ten CatchUp TV" provider-name="adammw111" version="0.4.0">
+<?xml version="1.0" ?><addon id="plugin.video.catchuptv.au.ninemsn" name="Channel Nine CatchUp TV" provider-name="predakanga" version="0.1.0">
     <requires>
         <import addon="xbmc.python" version="1.0"/>
         <import addon="script.module.simplejson"/>
@@ -12,8 +12,8 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <minversion>31542</minversion>
-        <summary>Network Ten CatchUp TV Video Player</summary>
-        <description>Watch latest episodes, sneak peeks, exclusive internet extras and other videos from Network Ten Online.</description>
-        <disclaimer>You must be within Australia to use watch these videos.[CR]&quot;Network Ten&quot;, Ten Logos and other works are copyright of their respective owners.</disclaimer>
+        <summary>Channel Nine CatchUp TV Video Player</summary>
+        <description>Watch latest episodes, sneak peeks, exclusive internet extras and other videos from Channel Nine's FixPlay service.</description>
+        <disclaimer>You must be within Australia to use watch these videos.[CR]&quot;Channel Nine&quot;, NineMSN Logos and other works are copyright of their respective owners.</disclaimer>
     </extension>
 </addon>

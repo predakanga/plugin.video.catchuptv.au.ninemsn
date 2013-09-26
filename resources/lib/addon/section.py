@@ -1,6 +1,7 @@
 #
-#   Network Ten CatchUp TV Video Addon
+#   NineMSN CatchUp TV Video Addon
 #
+#   This code is forked from Network Ten CatchUp TV Video Addon
 #   Copyright (c) 2013 Adam Malcontenti-Wilson
 # 
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,21 +36,35 @@ class Main:
     def __init__( self, params ):
         self.client = NineMSNVideo()
         handle = int(sys.argv[1])
+        section = params['id'][0]
+        page = 1
+        if 'page' in params:
+          page = int(params['page'][0])
         
-        def get_url(action, id):
+        def get_play_url(url):
           url_base = sys.argv[0]
-          url_params = {'action': action, 'id': id}
+          url_params = {'action': 'play', 'page_url': url}
           
           return "{0}?{1}".format(url_base, urllib.urlencode(url_params))
         
-        for section in self.client.get_sections():
-          li = xbmcgui.ListItem(section.name)
-          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('section', section.id), isFolder=True)
+        def get_page_url(page):
+          url_base = sys.argv[0]
+          url_params = {'action': 'section', 'id': section, 'page': page}
+          
+          return "{0}?{1}".format(url_base, urllib.urlencode(url_params))
         
-        for category in self.client.get_categories():
-          li = xbmcgui.ListItem(category.name)
-          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_url('category', category.id), isFolder=True)
+        for video in self.client.get_videos_for_section(section, page):
+          li = xbmcgui.ListItem("{0} - {1}".format(video.show, video.name), thumbnailImage=video.image)
+          li.setProperty('IsPlayable', 'true')
+          # Set the image if we have one
+          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_play_url(video.url))
 
-        # xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE ) # Needed?
+        # And tack on the "Next page" option all the time; should really check if there *is* a next page first
+        # Instead, let's just clamp it to 10 pages
+        if section != 'mostpopular' and page != 10:
+          li = xbmcgui.ListItem("Next Page")
+          xbmcplugin.addDirectoryItem(handle=handle, listitem=li, url=get_page_url(page+1), isFolder=True)
+        
+        xbmcplugin.addSortMethod( handle=handle, sortMethod=xbmcplugin.SORT_METHOD_NONE )
         xbmcplugin.setContent( handle=handle, content='tvshows' )
         xbmcplugin.endOfDirectory( handle=handle, succeeded=1 )
